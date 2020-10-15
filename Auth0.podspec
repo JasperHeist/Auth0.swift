@@ -1,4 +1,4 @@
-version = `agvtool mvers -terse1`.strip
+version = '1.28.1'
 
 web_auth_files = [
   'Auth0/A0ChallengeGenerator.h',
