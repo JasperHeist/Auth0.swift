@@ -72,6 +72,27 @@ final class DesktopWebAuth: BaseWebAuth {
         callback(.failure(error: WebAuthError.unknownError))
         return nil
     }
+    override func performLogout(logoutURL: URL,
+                       redirectURL: URL,
+                       federated: Bool,
+                       callback: @escaping (Bool) -> Void) -> AuthTransaction? {
+     
+        if #available(macOS 10.15, *) {
+            return super.performLogout(logoutURL: logoutURL,
+                                        redirectURL: redirectURL,
+                                        federated: federated,
+                                        callback: callback)
+        } else if #available(macOS 10.11, *) {
+            #if canImport(AppKit)
+              return AuthenticationLegacySessionCallback(url: logoutURL,
+                                                         schemeURL: redirectURL,
+                                                         callback: callback)
+             #endif
+        }
+
+        callback(false)
+        return nil
+    }
 }
 
 public extension _ObjectiveOAuth2 {
