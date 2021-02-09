@@ -32,7 +32,7 @@ final class AuthenticationLegacySession: SessionTransaction {
          logger: Logger?,
          ephemeralSession: Bool,
          callback: @escaping FinishTransaction) {
-        super.init(callback: Callback)
+        super.init(callback: callback)
 
         _ = TransactionStore.shared.resume(redirectURL)
        NSWorkspace.shared.open(authorizeURL)
