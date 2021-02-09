@@ -214,12 +214,6 @@ class BaseWebAuth: WebAuthenticatable {
             return AuthenticationServicesSessionCallback(url: logoutURL,
                                                          schemeURL: redirectURL,
                                                          callback: callback)
-        }else if #available(macOS 10.11, *) {
-            #if canImport(AppKit)
-            return AuthenticationServicesLegacySessionCallback(url:logoutURL,
-                                                               schemeURL: redirectURL,
-                                                               callback:callback)
-            #endif
         }
         #endif
         callback(false)
