@@ -28,6 +28,8 @@ final class AuthenticationLegacySessionCallback: SessionCallbackTransaction {
 
     init(url: URL, schemeURL: URL, callback: @escaping (Bool) -> Void) {
      
+        super.init(callback: callback)
+        
         TransactionStore.shared.clear()
         NSWorkspace.shared.open(url)
 
