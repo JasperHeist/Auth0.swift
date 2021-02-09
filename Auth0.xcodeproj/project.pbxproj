@@ -352,6 +352,7 @@
 		5FF2866F1D8A417B00314B72 /* _ObjectiveWebAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF2866E1D8A417B00314B72 /* _ObjectiveWebAuth.swift */; };
 		5FF465BC1CE2AC4500F7ED8C /* Management.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF465BB1CE2AC4500F7ED8C /* Management.swift */; };
 		5FF465BD1CE2AC4500F7ED8C /* Management.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF465BB1CE2AC4500F7ED8C /* Management.swift */; };
+		A419CD1225D2C8180089C9C2 /* AuthenticationLegacySessionCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A419CD1125D2C8180089C9C2 /* AuthenticationLegacySessionCallback.swift */; };
 		E849386924EAF9B70033C7CE /* AuthenticationLegacySession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E849386824EAF9B70033C7CE /* AuthenticationLegacySession.swift */; };
 /* End PBXBuildFile section */
 
@@ -656,6 +657,7 @@
 		5FF346491CEFEC04000799DE /* Auth0Tests.iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Auth0Tests.iOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		5FF3464A1CEFEC04000799DE /* Auth0Tests.OSX-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Auth0Tests.OSX-Bridging-Header.h"; sourceTree = "<group>"; };
 		5FF465BB1CE2AC4500F7ED8C /* Management.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Management.swift; path = Auth0/Management.swift; sourceTree = SOURCE_ROOT; };
+		A419CD1125D2C8180089C9C2 /* AuthenticationLegacySessionCallback.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationLegacySessionCallback.swift; sourceTree = "<group>"; };
 		E849386824EAF9B70033C7CE /* AuthenticationLegacySession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationLegacySession.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -757,6 +759,7 @@
 		5B16D8901F7141E5009476A5 /* AuthTransactions */ = {
 			isa = PBXGroup;
 			children = (
+				A419CD1125D2C8180089C9C2 /* AuthenticationLegacySessionCallback.swift */,
 				5C41F6A3244DC94E00252548 /* BaseAuthTransaction.swift */,
 				5C41F6A6244DC9DB00252548 /* SessionTransaction.swift */,
 				5C41F6A9244DCAFB00252548 /* SessionCallbackTransaction.swift */,
@@ -1869,6 +1872,7 @@
 				5F4A1F961D00AABC00C72242 /* OAuth2Grant.swift in Sources */,
 				5FCAB1731D09009600331C84 /* NSData+URLSafe.swift in Sources */,
 				5B16D88E1F7141A0009476A5 /* AuthenticationServicesSession.swift in Sources */,
+				A419CD1225D2C8180089C9C2 /* AuthenticationLegacySessionCallback.swift in Sources */,
 				5FD255BA1D14F70B00387ECB /* WebAuthError.swift in Sources */,
 				5B25A52F1E3F520300563AE5 /* NativeAuth.swift in Sources */,
 				5BEDE18A1EC21B040007300D /* CredentialsManager.swift in Sources */,
