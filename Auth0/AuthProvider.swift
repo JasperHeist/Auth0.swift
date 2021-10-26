@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if WEB_AUTH_PLATFORM
 /**
  The AuthProvider protocol is adopted by objects that are to be used as Native Authentication
  handlers. An object implementing this protocol is intended to supersede the default authentication
@@ -40,6 +41,7 @@
 
  ```
  */
+@available(*, deprecated, message: "not available for OIDC-conformant clients")
 public protocol AuthProvider {
     func login(withConnection connection: String, scope: String, parameters: [String: Any]) -> NativeAuthTransaction
 
@@ -53,3 +55,4 @@ public protocol AuthProvider {
      */
     static func isAvailable() -> Bool
 }
+#endif

@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if os(iOS)
 import UIKit
 import SafariServices
 #if canImport(AuthenticationServices)
@@ -41,6 +42,7 @@ public typealias A0URLOptionsKey = UIApplicationOpenURLOptionsKey
 
  - returns: if the url was handled by an on going session or not.
  */
+@available(*, deprecated, message: "this method is not needed when targeting iOS 11+")
 public func resumeAuth(_ url: URL, options: [A0URLOptionsKey: Any] = [:]) -> Bool {
     return TransactionStore.shared.resume(url)
 }
@@ -55,6 +57,7 @@ public protocol WebAuth: WebAuthenticatable {
      - returns: the same WebAuth instance to allow method chaining
      */
     @available(iOS 11, *)
+    @available(*, deprecated, message: "SFSafariViewController support will be removed in the next major release")
     func useLegacyAuthentication(withStyle style: UIModalPresentationStyle) -> Self
 
 }
@@ -114,12 +117,16 @@ final class MobileWebAuth: BaseWebAuth, WebAuth {
                                           handler: handler,
                                           callback: callback)
             }
+            #if !targetEnvironment(macCatalyst)
             return SafariServicesSession(authorizeURL: authorizeURL,
                                          redirectURL: redirectURL,
                                          state: state,
                                          handler: handler,
                                          logger: self.logger,
                                          callback: callback)
+            #else
+            return nil // Will never get executed because Catalyst will use AuthenticationServices
+            #endif
         }
         let (controller, finish) = newSafari(authorizeURL, callback: callback)
         let session = SafariSession(controller: controller,
@@ -144,9 +151,13 @@ final class MobileWebAuth: BaseWebAuth, WebAuth {
                                            federated: federated,
                                            callback: callback)
             }
+            #if !targetEnvironment(macCatalyst)
             return SafariServicesSessionCallback(url: logoutURL,
                                                  schemeURL: redirectURL,
                                                  callback: callback)
+            #else
+            return nil // Will never get executed because Catalyst will use AuthenticationServices
+            #endif
         }
         var urlComponents = URLComponents(url: logoutURL, resolvingAgainstBaseURL: true)!
         if federated, let firstQueryItem = urlComponents.queryItems?.first {
@@ -178,7 +189,7 @@ final class MobileWebAuth: BaseWebAuth, WebAuth {
             } else {
                 DispatchQueue.main.async {
                     guard let presenting = controller?.presentingViewController else {
-                        return callback(Result.failure(error: WebAuthError.cannotDismissWebAuthController))
+                        return callback(Result.failure(WebAuthError.cannotDismissWebAuthController))
                     }
                     presenting.dismiss(animated: true) {
                         callback(result)
@@ -211,11 +222,11 @@ public extension _ObjectiveOAuth2 {
 public protocol AuthResumable {
 
     /**
-     Resumes the transaction when the third party application notifies the application using an url with a custom scheme.
+     Resumes the transaction when the third party application notifies the application using a url with a custom scheme.
      This method should be called from the Application's `AppDelegate` or using `public func resumeAuth(_ url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool` method.
      
      - parameter url: the url send by the third party application that contains the result of the Auth
-     - parameter options: options recieved in the openUrl method of the `AppDelegate`
+     - parameter options: options received in the openUrl method of the `AppDelegate`
 
      - returns: if the url was expected and properly formatted otherwise it will return `false`.
     */
@@ -231,7 +242,7 @@ public extension AuthResumable {
     - parameter url:     url received in application's AppDelegate
     - parameter options: a dictionary of launch options received from application's AppDelegate
 
-    - returns: `true` if the url completed (successfuly or not) this session, `false` otherwise
+    - returns: `true` if the url completed (successfully or not) this session, `false` otherwise
     */
     func resume(_ url: URL, options: [A0URLOptionsKey: Any] = [:]) -> Bool {
         return self.resume(url, options: options)
@@ -255,6 +266,7 @@ extension AuthTransaction where Self: SessionCallbackTransaction {
 
 }
 
+#if !targetEnvironment(macCatalyst)
 @available(iOS 11.0, *)
 final class SafariServicesSession: SessionTransaction {
 
@@ -275,9 +287,9 @@ final class SafariServicesSession: SessionTransaction {
             guard $1 == nil, let callbackURL = $0 else {
                 let authError = $1 ?? WebAuthError.unknownError
                 if case SFAuthenticationError.canceledLogin = authError {
-                    self.callback(.failure(error: WebAuthError.userCancelled))
+                    self.callback(.failure(WebAuthError.userCancelled))
                 } else {
-                    self.callback(.failure(error: authError))
+                    self.callback(.failure(authError))
                 }
                 return TransactionStore.shared.clear()
             }
@@ -307,6 +319,10 @@ final class SafariServicesSessionCallback: SessionCallbackTransaction {
 
 }
 
+@available(iOS 11.0, *)
+extension SFAuthenticationSession: AuthSession {}
+#endif
+
 #if canImport(AuthenticationServices) && swift(>=5.1)
 @available(iOS 13.0, *)
 extension AuthenticationServicesSession: ASWebAuthenticationPresentationContextProviding {
@@ -326,6 +342,4 @@ extension AuthenticationServicesSessionCallback: ASWebAuthenticationPresentation
 
 }
 #endif
-
-@available(iOS 11.0, *)
-extension SFAuthenticationSession: AuthSession {}
+#endif

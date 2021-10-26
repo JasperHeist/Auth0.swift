@@ -1,5 +1,99 @@
 # Change Log
 
+## [1.37.1](https://github.com/auth0/Auth0.swift/tree/1.37.1) (2021-10-15)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.37.0...1.37.1)
+
+**Fixed**
+- Add `Carthage/Build` to the frameworks search path [\#521](https://github.com/auth0/Auth0.swift/pull/521) ([Widcket](https://github.com/Widcket))
+- Add `.macCatalyst` to Package.swift [\#518](https://github.com/auth0/Auth0.swift/pull/518) ([Widcket](https://github.com/Widcket))
+
+## [1.37.0](https://github.com/auth0/Auth0.swift/tree/1.37.0) (2021-10-12)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.36.0...1.37.0)
+
+**Changed**
+- Updated dependencies [\#505](https://github.com/auth0/Auth0.swift/pull/505) ([Widcket](https://github.com/Widcket))
+
+**Deprecated**
+- Deprecate `resumeAuth` and `useLegacyAuthentication` [\#514](https://github.com/auth0/Auth0.swift/pull/514) ([Widcket](https://github.com/Widcket))
+
+## [1.36.0](https://github.com/auth0/Auth0.swift/tree/1.36.0) (2021-09-01)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.35.0...1.36.0)
+
+**Added**
+- Add parameter option to `Request` [\#494](https://github.com/auth0/Auth0.swift/pull/494) ([konDeichmann](https://github.com/konDeichmann))
+
+**Deprecated**
+- Deprecate methods [SDK-2749] [\#499](https://github.com/auth0/Auth0.swift/pull/499) ([Widcket](https://github.com/Widcket))
+
+## [1.35.0](https://github.com/auth0/Auth0.swift/tree/1.35.0) (2021-07-19)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.34.0...1.35.0)
+
+**Added**
+- Expose recovery code [SDK-2661] [\#487](https://github.com/auth0/Auth0.swift/pull/487) ([Widcket](https://github.com/Widcket))
+- [FR-485] Add support for custom LAPolicy when evaluating biometry aut… [\#486](https://github.com/auth0/Auth0.swift/pull/486) ([krodak](https://github.com/krodak))
+
+## [1.34.0](https://github.com/auth0/Auth0.swift/tree/1.34.0) (2021-07-05)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.33.1...1.34.0)
+
+**Added**
+- Add `user` property to CredentialsManager [SDK-2633] [\#482](https://github.com/auth0/Auth0.swift/pull/482) ([Widcket](https://github.com/Widcket))
+
+## [1.33.1](https://github.com/auth0/Auth0.swift/tree/1.33.1) (2021-06-07)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.33.0...1.33.1)
+
+**Changed**
+- Make test dependencies not resolve when installing with SPM [SDK-2600] [\#476](https://github.com/auth0/Auth0.swift/pull/476) ([Widcket](https://github.com/Widcket))
+
+## [1.33.0](https://github.com/auth0/Auth0.swift/tree/1.33.0) (2021-04-23)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.32.0...1.33.0)
+
+**Changed**
+- Use Swift's built-in Result type when available [\#467](https://github.com/auth0/Auth0.swift/pull/467) ([ejensen](https://github.com/ejensen))
+
+## [1.32.0](https://github.com/auth0/Auth0.swift/tree/1.32.0) (2021-03-18)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.31.1...1.32.0)
+
+**Added**
+- Added support for organizations [SDK-2397] [\#463](https://github.com/auth0/Auth0.swift/pull/463) ([Widcket](https://github.com/Widcket))
+
+## [1.31.1](https://github.com/auth0/Auth0.swift/tree/1.31.1) (2021-03-09)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.31.0...1.31.1)
+
+**Fixed**
+- Skipped kid validation when alg is HS256 [SDK-2328] [\#455](https://github.com/auth0/Auth0.swift/pull/455) ([Widcket](https://github.com/Widcket))
+
+## [1.31.0](https://github.com/auth0/Auth0.swift/tree/1.31.0) (2021-02-12)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.30.1...1.31.0)
+
+**Added**
+- Added support for OOB and Recovery code MFA challenges [\#442](https://github.com/auth0/Auth0.swift/pull/442) ([ejensen](https://github.com/ejensen))
+- Added support for a wider variety of primitive types for the Credentials expiration date [\#440](https://github.com/auth0/Auth0.swift/pull/440) ([seanmcneil](https://github.com/seanmcneil))
+
+**Fixed**
+- Always add a max_age if one was provided [\#452](https://github.com/auth0/Auth0.swift/pull/452) ([Widcket](https://github.com/Widcket))
+
+## [1.30.1](https://github.com/auth0/Auth0.swift/tree/1.30.1) (2020-11-11)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.30.0...1.30.1)
+
+**Fixed**
+- Fixed passwordless error detection [\#430](https://github.com/auth0/Auth0.swift/pull/430) ([Widcket](https://github.com/Widcket))
+
+## [1.30.0](https://github.com/auth0/Auth0.swift/tree/1.30.0) (2020-10-23)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.29.0...1.30.0)
+
+**Added**
+- Added clearSession to the Objective-C WebAuth wrapper [\#426](https://github.com/auth0/Auth0.swift/pull/426) ([Widcket](https://github.com/Widcket))
+- Added Swift Package Manager support [SDK-2014] [\#425](https://github.com/auth0/Auth0.swift/pull/425) ([Widcket](https://github.com/Widcket))
+
+## [1.29.0](https://github.com/auth0/Auth0.swift/tree/1.29.0) (2020-10-08)
+[Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.28.0...1.29.0)
+
+**Changed**
+- Updated Quick and Nimble [\#421](https://github.com/auth0/Auth0.swift/pull/421) ([Widcket](https://github.com/Widcket))
+
+**Fixed**
+- Bugfix for minTTL on CredentialsManager.swift [\#420](https://github.com/auth0/Auth0.swift/pull/420) ([heyzooi](https://github.com/heyzooi))
+
 ## [1.28.0](https://github.com/auth0/Auth0.swift/tree/1.28.0) (2020-08-21)
 [Full Changelog](https://github.com/auth0/Auth0.swift/compare/1.27.0...1.28.0)
 

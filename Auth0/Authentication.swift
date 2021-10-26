@@ -170,7 +170,7 @@ public protocol Authentication: Trackable, Loggable {
 
      - returns: authentication request that will yield Auth0 User Credentials
      - seeAlso: Credentials
-     - warning: this method is deprecated in favor of `login(usernameOrEmail username:, password:, realm:, audience:, scope:)` for Database connections. For Passwordless connections use `login(email:, code:, audience:, scope:, parameters:)` or `login(phoneNumber:, code:, audience:, scope:, parameters:)` instead.
+     - warning: deprecated in favor of `login(usernameOrEmail username:, password:, realm:, audience:, scope:)` for Database connections. For Passwordless connections use `login(email:, code:, audience:, scope:, parameters:)` or `login(phoneNumber:, code:, audience:, scope:, parameters:)` instead.
      - requires: Legacy Grant `http://auth0.com/oauth/legacy/grant-type/ro`. Check [our documentation](https://auth0.com/docs/clients/client-grant-types) for more info and how to enable it.
      */
     @available(*, deprecated, message: "see login(usernameOrEmail username:, password:, realm:, audience:, scope:)")
@@ -232,6 +232,40 @@ public protocol Authentication: Trackable, Loggable {
      - requires: Grant `http://auth0.com/oauth/grant-type/mfa-otp`. Check [our documentation](https://auth0.com/docs/clients/client-grant-types) for more info and how to enable it.
      */
     func login(withOTP otp: String, mfaToken: String) -> Request<Credentials, AuthenticationError>
+
+    /// Verifies multi-factor authentication (MFA) using an out-of-band (OOB) challenge (either Push notification, SMS, or Voice).
+    ///
+    /// - Parameters:
+    ///   - oobCode: The oob code received from the challenge request
+    ///   - mfaToken: Token returned when authentication fails due to MFA requirement
+    ///   - bindingCode: A code used to bind the side channel (used to deliver the challenge) with the main channel you are using to authenticate. This is usually an OTP-like code delivered as part of the challenge message
+    ///
+    /// - returns: authentication request that will yield Auth0 User Credentials
+    /// - requires: Grant `http://auth0.com/oauth/grant-type/mfa-oob`. Check [our documentation](https://auth0.com/docs/clients/client-grant-types) for more info and how to enable it.
+    func login(withOOBCode oobCode: String, mfaToken: String, bindingCode: String?) -> Request<Credentials, AuthenticationError>
+
+    /// Verifies multi-factor authentication (MFA) using a recovery code.
+    /// Some multi-factor authentication (MFA) providers (such as Guardian) support using a recovery code to login. Use this method to authenticate when the user's enrolled device is unavailable, or the user cannot receive the challenge or accept it due to connectivity issues.
+    ///
+    /// - Parameters:
+    ///   - recoveryCode: Recovery code provided by the end-user
+    ///   - mfaToken: Token returned when authentication fails due to MFA requirement
+    ///
+    /// - returns: authentication request that will yield Auth0 User Credentials. Might include a recovery code, which the application must display to the end-user to be stored securely for future use
+    /// - requires: Grant `http://auth0.com/oauth/grant-type/mfa-recovery-code`. Check [our documentation](https://auth0.com/docs/clients/client-grant-types) for more info and how to enable it.
+    func login(withRecoveryCode recoveryCode: String, mfaToken: String) -> Request<Credentials, AuthenticationError>
+
+    /// Request a challenge for multi-factor authentication (MFA) based on the challenge types supported by the application and user.
+    /// The `type` is how the user will get the challenge and prove possession. Supported challenge types include:
+    /// `otp`: for one-time password (OTP)
+    /// `oob`: for SMS/Voice messages or out-of-band (OOB)
+    ///
+    /// - Parameters:
+    ///   - mfaToken: Token returned when authentication fails due to MFA requirement
+    ///   - types: A list of the challenges types accepted by your application. Accepted challenge types are `oob` or `otp`. Excluding this parameter means that your client application accepts all supported challenge types
+    ///   - channel: The channel to use for OOB. Can only be provided when challenge type is `oob`. Accepted values are `sms`, `voice`, or `auth0`. Excluding this parameter means that your client application will accept all supported OOB channels
+    ///   - authenticatorId: The ID of the authenticator to challenge. You can get the ID by querying the list of available authenticators for the user
+    func multifactorChallenge(mfaToken: String, types: [String]?, channel: String?, authenticatorId: String?) -> Request<Challenge, AuthenticationError>
 
     /**
     Authenticate a user with their Sign In With Apple authorization code.
@@ -506,7 +540,7 @@ public protocol Authentication: Trackable, Loggable {
      ```
      
      - parameter token: token obtained by authenticating the user
-     - warning: this method is deprecated in favor of `userInfo(withAccessToken accessToken:)`
+     - warning: deprecated in favor of `userInfo(withAccessToken accessToken:)`
      - returns: a request that will yield token information
      */
     @available(*, deprecated, message: "see userInfo(withAccessToken accessToken:)")
@@ -525,8 +559,9 @@ public protocol Authentication: Trackable, Loggable {
      - parameter token: token obtained by authenticating the user
 
      - returns: a request that will yield user information
-     - warning: for OIDC-conformant clients please use `userInfo(withAccessToken accessToken:)`
+     - warning: deprecated in favor of `userInfo(withAccessToken accessToken:)`
      */
+    @available(*, deprecated, message: "see userInfo(withAccessToken accessToken:)")
     func userInfo(token: String) -> Request<Profile, AuthenticationError>
 
     /**
@@ -572,9 +607,10 @@ public protocol Authentication: Trackable, Loggable {
      - parameter parameters: additional parameters sent during authentication
 
      - returns: a request that will yield Auth0 user's credentials
-     - warning: disabled for OIDC-conformant clients, an alternative will be added in a future release
+     - warning: deprecated as it is not available for OIDC-conformant clients
      - requires: Legacy Grant `http://auth0.com/oauth/legacy/grant-type/access_token`. Check [our documentation](https://auth0.com/docs/clients/client-grant-types) for more info and how to enable it.
      */
+    @available(*, deprecated, message: "not available for OIDC-conformant clients")
     func loginSocial(token: String, connection: String, scope: String, parameters: [String: Any]) -> Request<Credentials, AuthenticationError>
 
     /**
@@ -643,7 +679,7 @@ public protocol Authentication: Trackable, Loggable {
     - parameter fullName: The full name property returned with the Apple ID Credentials
 
     - returns: a request that will yield Auth0 user's credentials
-    - warning: this method is deprecated in favor of `login(appleAuthorizationCode authorizationCode:, fullName:, scope:, audience:)`
+    - warning: deprecated in favor of `login(appleAuthorizationCode authorizationCode:, fullName:, scope:, audience:)`
     */
     @available(*, deprecated, message: "see login(appleAuthorizationCode authorizationCode:, fullName:, scope:, audience:)")
     func tokenExchange(withAppleAuthorizationCode authCode: String, scope: String?, audience: String?, fullName: PersonNameComponents?) -> Request<Credentials, AuthenticationError>
@@ -676,9 +712,11 @@ public protocol Authentication: Trackable, Loggable {
     /**
      Calls delegation endpoint with the given parameters.
      The only parameters it adds by default are `grant_type` and `client_id`.
-     - parameter parametes: dictionary with delegation parameters to send in the request.
+     - parameter parameters: dictionary with delegation parameters to send in the request.
      - returns: a request that will yield the result of delegation
+     - warning: deprecated due to the `/delegation` endpoint being deprecated
     */
+    @available(*, deprecated, message: "the delegation endpoint is deprecated")
     func delegation(withParameters parameters: [String: Any]) -> Request<[String: Any], AuthenticationError>
 
     /**

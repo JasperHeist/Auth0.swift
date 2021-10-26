@@ -62,7 +62,9 @@ playground.xcworkspace
 #
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
 # Packages/
+.swiftpm/
 .build/
+Package.resolved
 
 # CocoaPods
 #
@@ -89,7 +91,6 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
-fastlane/README.md
 
 # AppCode
 #

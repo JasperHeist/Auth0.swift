@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if WEB_AUTH_PLATFORM
 /**
 Represents an ongoing Auth transaction with an Identity Provider (Auth0 or a third party).
 
@@ -31,7 +32,8 @@ When that happens the OS will call a method in your `AppDelegate` and that is wh
 */
 public protocol AuthTransaction: AuthResumable, AuthCancelable {
 
-    /// value of the OAuth 2.0 state parameter. It must be a cryptographically secure randon string used to protect the app with request forgery.
+    /// value of the OAuth 2.0 state parameter. It must be a cryptographically secure random string used to protect the app with request forgery.
     var state: String? { get }
 
 }
+#endif

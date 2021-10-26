@@ -20,8 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 import Quick
 import Nimble
+
 @testable import Auth0
 
 private let AccessToken = UUID().uuidString.replacingOccurrences(of: "-", with: "")
@@ -37,7 +39,7 @@ class CredentialsSpec: QuickSpec {
         describe("init from json") {
 
             it("should have all tokens and token_type") {
-                let credentials = Credentials(json: ["access_token": AccessToken, "token_type": Bearer, "id_token": IdToken, "refresh_token": RefreshToken, "expires_in" : expiresIn, "scope": Scope])
+                let credentials = Credentials(json: ["access_token": AccessToken, "token_type": Bearer, "id_token": IdToken, "refresh_token": RefreshToken, "expires_in" : expiresIn, "scope": Scope, "recovery_code": RecoveryCode])
                 expect(credentials).toNot(beNil())
                 expect(credentials.accessToken) == AccessToken
                 expect(credentials.tokenType) == Bearer
@@ -45,6 +47,7 @@ class CredentialsSpec: QuickSpec {
                 expect(credentials.refreshToken) == RefreshToken
                 expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
                 expect(credentials.scope) == Scope
+                expect(credentials.recoveryCode) == RecoveryCode
             }
 
             it("should have only access_token and token_type") {
@@ -55,6 +58,7 @@ class CredentialsSpec: QuickSpec {
                 expect(credentials.idToken).to(beNil())
                 expect(credentials.expiresIn).to(beNil())
                 expect(credentials.scope).to(beNil())
+                expect(credentials.recoveryCode).to(beNil())
             }
 
             it("should have id_token") {
@@ -69,18 +73,28 @@ class CredentialsSpec: QuickSpec {
 
             context("expires_in responses") {
 
-                it("should have valid exiresIn from string") {
+                it("should have valid expiresIn from string") {
                     let credentials = Credentials(json: ["expires_in": "3600"])
                     expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
                 }
 
-                it("should have valid exiresIn from int") {
+                it("should have valid expiresIn from int") {
                     let credentials = Credentials(json: ["expires_in": 3600])
                     expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
                 }
 
-                it("should have valid exiresIn from double") {
+                it("should have valid expiresIn from double") {
                     let credentials = Credentials(json: ["expires_in": 3600.0])
+                    expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
+                }
+                
+                it("should have valid expiresIn from Int64") {
+                    let credentials = Credentials(json: ["expires_in": Int64(3600)])
+                    expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
+                }
+
+                it("should have valid expiresIn from float") {
+                    let credentials = Credentials(json: ["expires_in": Float(3600.0)])
                     expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
                 }
 
@@ -100,21 +114,22 @@ class CredentialsSpec: QuickSpec {
         describe("secure coding") {
 
             it("should unarchive as credentials type") {
-                let credentialsOrig = Credentials(json: ["access_token": AccessToken, "token_type": Bearer, "id_token": IdToken, "refresh_token": RefreshToken, "expires_in" : expiresIn, "scope" : Scope])
+                let credentialsOrig = Credentials(json: ["access_token": AccessToken, "token_type": Bearer, "id_token": IdToken, "refresh_token": RefreshToken, "expires_in" : expiresIn, "scope" : Scope, "recovery_code": RecoveryCode])
                 let saveData = NSKeyedArchiver.archivedData(withRootObject: credentialsOrig)
                 let credentials = NSKeyedUnarchiver.unarchiveObject(with: saveData)
                 expect(credentials as? Credentials).toNot(beNil())
             }
 
             it("should have all properties") {
-                let credentialsOrig = Credentials(json: ["access_token": AccessToken, "token_type": Bearer, "id_token": IdToken, "refresh_token": RefreshToken, "expires_in" : expiresIn, "scope" : Scope])
+                let credentialsOrig = Credentials(json: ["access_token": AccessToken, "token_type": Bearer, "id_token": IdToken, "refresh_token": RefreshToken, "expires_in" : expiresIn, "scope" : Scope, "recovery_code": RecoveryCode])
                 let saveData = NSKeyedArchiver.archivedData(withRootObject: credentialsOrig)
                 let credentials = NSKeyedUnarchiver.unarchiveObject(with: saveData) as! Credentials
                 expect(credentials.accessToken) == AccessToken
                 expect(credentials.tokenType) == Bearer
                 expect(credentials.idToken) == IdToken
-                expect(credentials.scope) == Scope
                 expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
+                expect(credentials.scope) == Scope
+                expect(credentials.recoveryCode) == RecoveryCode
             }
 
             it("should have access_token only") {
@@ -126,6 +141,7 @@ class CredentialsSpec: QuickSpec {
                 expect(credentials.idToken).to(beNil())
                 expect(credentials.expiresIn).to(beNil())
                 expect(credentials.scope).to(beNil())
+                expect(credentials.recoveryCode).to(beNil())
             }
 
             it("should have refresh_token and expires_in only") {
@@ -138,6 +154,7 @@ class CredentialsSpec: QuickSpec {
                 expect(credentials.idToken).to(beNil())
                 expect(credentials.expiresIn).to(beCloseTo(Date(timeIntervalSinceNow: expiresIn), within: 5))
                 expect(credentials.scope).to(beNil())
+                expect(credentials.recoveryCode).to(beNil())
             }
 
         }

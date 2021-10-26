@@ -39,12 +39,18 @@ let UpdatedAtTimestamp = 1440004681.000
 let CreatedAt = "2015-08-19T17:18:00.000Z"
 let CreatedAtUnix = "1440004680"
 let CreatedAtTimestamp = 1440004680.000
-let Sub = "auth0|\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
+let Sub = "auth0|123456789"
+let Kid = "key123"
 let LocaleUS = "en-US"
 let ZoneEST = "US/Eastern"
 let OTP = "123456"
+let OOB = "654321"
+let OOBChannel = "sms"
+let BindingCode = "214365"
+let RecoveryCode = "162534"
 let MFAToken = UUID().uuidString.replacingOccurrences(of: "-", with: "")
-let JWKKid = "key123"
+let AuthenticatorId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
+let ChallengeTypes = ["oob", "otp"]
 
 func authResponse(accessToken: String, idToken: String? = nil, refreshToken: String? = nil, expiresIn: Double? = nil) -> HTTPStubsResponse {
     var json = [
@@ -123,27 +129,33 @@ func managementErrorResponse(error: String, description: String, code: String, s
     return HTTPStubsResponse(jsonObject: ["code": code, "description": description, "statusCode": statusCode, "error": error], statusCode: Int32(statusCode), headers: ["Content-Type": "application/json"])
 }
 
-func jwksResponse(kid: String? = JWKKid) -> HTTPStubsResponse {
+func jwksResponse(kid: String? = Kid) -> HTTPStubsResponse {
+    var jwks: [String: Any] = ["keys": [["alg": "RS256",
+                                         "kty": "RSA",
+                                         "use": "sig",
+                                         "n": "uGbXWiK3dQTyCbX5xdE4yCuYp0AF2d15Qq1JSXT_lx8CEcXb9RbDddl8jGDv-spi5qPa8qEHiK7FwV2KpRE983wGPnYsAm9BxLFb4YrLYcDFOIGULuk2FtrPS512Qea1bXASuvYXEpQNpGbnTGVsWXI9C-yjHztqyL2h8P6mlThPY9E9ue2fCqdgixfTFIF9Dm4SLHbphUS2iw7w1JgT69s7of9-I9l5lsJ9cozf1rxrXX4V1u_SotUuNB3Fp8oB4C1fLBEhSlMcUJirz1E8AziMCxS-VrRPDM-zfvpIJg3JljAh3PJHDiLu902v9w-Iplu1WyoB2aPfitxEhRN0Yw",
+                                         "e": "AQAB",
+                                         "kid": kid]]]
+
     #if WEB_AUTH_PLATFORM
-    let jwk = generateRSAJWK()
-    let jwks = ["keys": [["alg": jwk.algorithm,
+    if #available(iOS 10.0, macOS 10.12, *) { // Necessary for SPM
+        let jwk = generateRSAJWK()
+        jwks = ["keys": [["alg": jwk.algorithm,
                           "kty": jwk.keyType,
                           "use": jwk.usage,
                           "n": jwk.rsaModulus,
                           "e": jwk.rsaExponent,
                           "kid": kid]]]
-    #else
-    let jwks = ["keys": [["alg": "RS256",
-                          "kty": "RSA",
-                          "use": "sig",
-                          "n": "uGbXWiK3dQTyCbX5xdE4yCuYp0AF2d15Qq1JSXT_lx8CEcXb9RbDddl8jGDv-spi5qPa8qEHiK7FwV2KpRE983wGPnYsAm9BxLFb4YrLYcDFOIGULuk2FtrPS512Qea1bXASuvYXEpQNpGbnTGVsWXI9C-yjHztqyL2h8P6mlThPY9E9ue2fCqdgixfTFIF9Dm4SLHbphUS2iw7w1JgT69s7of9-I9l5lsJ9cozf1rxrXX4V1u_SotUuNB3Fp8oB4C1fLBEhSlMcUJirz1E8AziMCxS-VrRPDM-zfvpIJg3JljAh3PJHDiLu902v9w-Iplu1WyoB2aPfitxEhRN0Yw",
-                          "e": "AQAB",
-                          "kid": kid]]]
+    }
     #endif
-    
+
     return HTTPStubsResponse(jsonObject: jwks, statusCode: 200, headers: nil)
 }
 
 func jwksErrorResponse() -> HTTPStubsResponse {
     return HTTPStubsResponse(jsonObject: [], statusCode: 500, headers: nil)
+}
+
+func multifactorChallengeResponse(challengeType: String, oobCode: String? = nil, bindingMethod: String? = nil) -> HTTPStubsResponse {
+    return HTTPStubsResponse(jsonObject: ["challenge_type": challengeType, "oob_code": oobCode, "binding_method": bindingMethod], statusCode: 200, headers: nil)
 }

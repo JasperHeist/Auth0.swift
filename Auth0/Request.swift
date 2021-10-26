@@ -95,6 +95,17 @@ public struct Request<T, E: Auth0Error>: Requestable {
         task.resume()
     }
 
+    /**
+     Modify the parameters by creating a copy of self and adding the provided parameters to `payload`.
+
+     - parameter payload: Additional parameters for the request. The provided map will be added to `payload`.
+     */
+    public func parameters(_ payload: [String: Any]) -> Self {
+        var parameter = self.payload
+        payload.forEach { parameter[$0] = $1 }
+
+        return Request(session: self.session, url: self.url, method: self.method, handle: self.handle, payload: parameter, headers: self.headers, logger: self.logger, telemetry: self.telemetry)
+    }
 }
 
 /**
@@ -116,7 +127,7 @@ public struct ConcatRequest<F, S, E: Auth0Error>: Requestable {
         first.start { result in
             switch result {
             case .failure(let cause):
-                callback(.failure(error: cause))
+                callback(.failure(cause))
             case .success:
                 second.start(callback)
             }

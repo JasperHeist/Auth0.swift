@@ -20,12 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if WEB_AUTH_PLATFORM
 import Foundation
 import LocalAuthentication
 
 struct BioAuthentication {
 
     private let authContext: LAContext
+    private let evaluationPolicy: LAPolicy
 
     let title: String
     var fallbackTitle: String? {
@@ -41,11 +43,12 @@ struct BioAuthentication {
 
     @available(iOS 9.0, macOS 10.15, *)
     var available: Bool {
-        return self.authContext.canEvaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics, error: nil)
+        return self.authContext.canEvaluatePolicy(evaluationPolicy, error: nil)
     }
 
-    init(authContext: LAContext, title: String, cancelTitle: String? = nil, fallbackTitle: String? = nil) {
+    init(authContext: LAContext, evaluationPolicy: LAPolicy, title: String, cancelTitle: String? = nil, fallbackTitle: String? = nil) {
         self.authContext = authContext
+        self.evaluationPolicy = evaluationPolicy
         self.title = title
         if #available(iOS 10.0, macOS 10.15, *) { self.cancelTitle = cancelTitle }
         self.fallbackTitle = fallbackTitle
@@ -53,10 +56,11 @@ struct BioAuthentication {
 
     @available(iOS 9.0, macOS 10.15, *)
     func validateBiometric(callback: @escaping (Error?) -> Void) {
-        self.authContext.evaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics, localizedReason: self.title) {
+        self.authContext.evaluatePolicy(evaluationPolicy, localizedReason: self.title) {
             guard $1 == nil else { return callback($1) }
             callback($0 ? nil : LAError(LAError.authenticationFailed))
         }
     }
 
 }
+#endif

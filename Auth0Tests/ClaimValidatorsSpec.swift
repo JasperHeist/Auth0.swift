@@ -23,10 +23,10 @@
 import Foundation
 import Quick
 import Nimble
-import OHHTTPStubs
 
 @testable import Auth0
 
+@available(iOS 10.0, macOS 10.12, *)
 class ClaimValidatorsSpec: IDTokenValidatorBaseSpec {
     
     override func spec() {
@@ -433,6 +433,47 @@ class ClaimValidatorsSpec: IDTokenValidatorBaseSpec {
                     let expectedError = IDTokenAuthTimeValidator.ValidationError.pastLastAuth(baseTime: currentTimeEpoch,
                                                                                               lastAuthTime: authTimeEpoch)
                     let result = authTimeValidator.validate(jwt)
+                    
+                    expect(result).to(matchError(expectedError))
+                    expect(result?.errorDescription).to(equal(expectedError.errorDescription))
+                }
+            }
+            
+        }
+
+        describe("organization validation") {
+            
+            var organizationValidator: IDTokenOrgIdValidator!
+            let expectedOrganization = "abc1234"
+            
+            beforeEach {
+                organizationValidator = IDTokenOrgIdValidator(organization: expectedOrganization)
+            }
+            
+            context("missing org_id") {
+                it("should return nil if org_id is present") {
+                    let jwt = generateJWT(organization: expectedOrganization)
+                    
+                    expect(organizationValidator.validate(jwt)).to(beNil())
+                }
+                
+                it("should return an error if org_id is missing") {
+                    let jwt = generateJWT(organization: nil)
+                    let expectedError = IDTokenOrgIdValidator.ValidationError.missingOrgId
+                    let result = organizationValidator.validate(jwt)
+                    
+                    expect(result).to(matchError(expectedError))
+                    expect(result?.errorDescription).to(equal(expectedError.errorDescription))
+                }
+            }
+            
+            context("mismatched org_id") {
+                it("should return an error if org_id does not match the request organization") {
+                    let organization = "xyz6789"
+                    let jwt = generateJWT(organization: organization)
+                    let expectedError = IDTokenOrgIdValidator.ValidationError.mismatchedOrgId(actual: organization,
+                                                                                              expected: expectedOrganization)
+                    let result = organizationValidator.validate(jwt)
                     
                     expect(result).to(matchError(expectedError))
                     expect(result?.errorDescription).to(equal(expectedError.errorDescription))

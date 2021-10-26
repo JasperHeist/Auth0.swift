@@ -1,6 +1,6 @@
-// A0SHA.h
+//  Challenge.swift
 //
-// Copyright (c) 2016 Auth0 (http://auth0.com)
+// Copyright (c) 2021 Auth0 (http://auth0.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
+public struct Challenge: Codable {
+    public let challengeType: String
+    public let oobCode: String?
+    public let bindingMethod: String?
 
-NS_ASSUME_NONNULL_BEGIN
-@interface A0SHA: NSObject
-
-- (nullable instancetype)initWithAlgorithm: (NSString *)algorithm;
-
-- (NSData *)hash: (NSData *)data;
-
-@end
-NS_ASSUME_NONNULL_END
+    public enum CodingKeys: String, CodingKey {
+        case challengeType = "challenge_type"
+        case oobCode = "oob_code"
+        case bindingMethod = "binding_method"
+    }
+}

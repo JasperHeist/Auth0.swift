@@ -20,16 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 import Quick
 import Nimble
 import OHHTTPStubs
+#if SWIFT_PACKAGE
+import OHHTTPStubsSwift
+#endif
 
 @testable import Auth0
 
 private let Domain = "samples.auth0.com"
 private let Token = UUID().uuidString
 private let NonExistentUser = "auth0|notfound"
-private let Timeout = DispatchTimeInterval.seconds(2)
+private let Timeout: DispatchTimeInterval = .seconds(2)
 
 class UsersSpec: QuickSpec {
 

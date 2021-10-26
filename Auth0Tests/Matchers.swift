@@ -21,8 +21,12 @@
 // THE SOFTWARE.
 
 import Foundation
-import OHHTTPStubs
 import Nimble
+import OHHTTPStubs
+#if SWIFT_PACKAGE
+import OHHTTPStubsSwift
+#endif
+
 @testable import Auth0
 
 func hasAllOf(_ parameters: [String: String]) -> HTTPStubsTestBlock {
@@ -134,6 +138,10 @@ func isLinkPath(_ domain: String, identifier: String) -> HTTPStubsTestBlock {
 
 func isJWKSPath(_ domain: String) -> HTTPStubsTestBlock {
     return isHost(domain) && isPath("/.well-known/jwks.json")
+}
+
+func isMultifactorChallenge(_ domain: String) -> HTTPStubsTestBlock {
+    return isMethodPOST() && isHost(domain) && isPath("/mfa/challenge")
 }
 
 func hasBearerToken(_ token: String) -> HTTPStubsTestBlock {

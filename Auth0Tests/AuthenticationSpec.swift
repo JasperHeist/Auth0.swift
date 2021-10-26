@@ -20,9 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 import Quick
 import Nimble
 import OHHTTPStubs
+#if SWIFT_PACKAGE
+import OHHTTPStubsSwift
+#endif
 
 @testable import Auth0
 
@@ -37,7 +41,7 @@ private let AccessToken = UUID().uuidString.replacingOccurrences(of: "-", with: 
 private let IdToken = UUID().uuidString.replacingOccurrences(of: "-", with: "")
 private let FacebookToken = UUID().uuidString.replacingOccurrences(of: "-", with: "")
 private let InvalidFacebookToken = UUID().uuidString.replacingOccurrences(of: "-", with: "")
-private let Timeout = DispatchTimeInterval.seconds(2)
+private let Timeout: DispatchTimeInterval = .seconds(2)
 private let TokenExchangeGrantType = "urn:ietf:params:oauth:grant-type:token-exchange"
 private let PasswordlessGrantType = "http://auth0.com/oauth/grant-type/passwordless/otp"
 
@@ -143,12 +147,12 @@ class AuthenticationSpec: QuickSpec {
 
         }
 
-        describe("login MFA") {
+        describe("login MFA OTP") {
 
             beforeEach {
-                stub(condition: isToken(Domain) && hasAtLeast(["otp":OTP, "mfa_token": MFAToken])) { _ in return authResponse(accessToken: AccessToken, idToken: IdToken) }.name = "OpenID Auth"
-                stub(condition: isToken(Domain) && hasAtLeast(["otp":"bad_otp", "mfa_token": MFAToken])) { _ in return authFailure(code: "invalid_grant", description: "Invalid otp_code.") }.name = "invalid otp"
-                stub(condition: isToken(Domain) && hasAtLeast(["otp":OTP, "mfa_token": "bad_token"])) { _ in return authFailure(code: "invalid_grant", description: "Malformed mfa_token") }.name = "invalid mfa_token"
+                stub(condition: isToken(Domain) && hasAtLeast(["otp": OTP, "mfa_token": MFAToken])) { _ in return authResponse(accessToken: AccessToken, idToken: IdToken) }.name = "OpenID Auth"
+                stub(condition: isToken(Domain) && hasAtLeast(["otp": "bad_otp", "mfa_token": MFAToken])) { _ in return authFailure(code: "invalid_grant", description: "Invalid otp_code.") }.name = "invalid otp"
+                stub(condition: isToken(Domain) && hasAtLeast(["otp": OTP, "mfa_token": "bad_token"])) { _ in return authFailure(code: "invalid_grant", description: "Malformed mfa_token") }.name = "invalid mfa_token"
             }
 
             it("should login with otp and mfa tokens") {
@@ -177,6 +181,103 @@ class AuthenticationSpec: QuickSpec {
                     }
                 }
             }
+        }
+
+        describe("login MFA OOB") {
+
+            beforeEach {
+                stub(condition: isToken(Domain) && hasAtLeast(["oob_code": OOB, "mfa_token": MFAToken, "binding_code": BindingCode])) { _ in return authResponse(accessToken: AccessToken, idToken: IdToken) }.name = "OpenID Auth"
+                stub(condition: isToken(Domain) && hasAtLeast(["oob_code": "bad_oob", "mfa_token": MFAToken])) { _ in return authFailure(code: "invalid_grant", description: "Invalid oob_code.") }.name = "invalid oob_code"
+                stub(condition: isToken(Domain) && hasAtLeast(["oob_code": OOB, "mfa_token": "bad_token"])) { _ in return authFailure(code: "invalid_grant", description: "Malformed mfa_token") }.name = "invalid mfa_token"
+            }
+
+            it("should login with oob code and mfa tokens") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.login(withOOBCode: OOB, mfaToken: MFAToken, bindingCode: BindingCode).start { result in
+                        expect(result).to(haveCredentials())
+                        done()
+                    }
+                }
+            }
+
+            it("should fail login with bad oob code") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.login(withOOBCode: "bad_oob", mfaToken: MFAToken, bindingCode: nil).start { result in
+                        expect(result).to(haveAuthenticationError(code: "invalid_grant", description: "Invalid oob_code."))
+                        done()
+                    }
+                }
+            }
+
+            it("should fail login with invalid mfa") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.login(withOOBCode: OOB, mfaToken: "bad_token", bindingCode: nil).start { result in
+                        expect(result).to(haveAuthenticationError(code: "invalid_grant", description: "Malformed mfa_token"))
+                        done()
+                    }
+                }
+            }
+        }
+
+        describe("login MFA recovery code") {
+
+            beforeEach {
+                stub(condition: isToken(Domain) && hasAtLeast(["recovery_code": RecoveryCode, "mfa_token": MFAToken])) { _ in return authResponse(accessToken: AccessToken, idToken: IdToken) }.name = "OpenID Auth"
+                stub(condition: isToken(Domain) && hasAtLeast(["recovery_code": "bad_recovery", "mfa_token": MFAToken])) { _ in return authFailure(code: "invalid_grant", description: "Invalid recovery_code.") }.name = "invalid recovery code"
+                stub(condition: isToken(Domain) && hasAtLeast(["recovery_code": RecoveryCode, "mfa_token": "bad_token"])) { _ in return authFailure(code: "invalid_grant", description: "Malformed mfa_token") }.name = "invalid mfa_token"
+            }
+
+            it("should login with recovery code and mfa tokens") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.login(withRecoveryCode: RecoveryCode, mfaToken: MFAToken).start { result in
+                        expect(result).to(haveCredentials())
+                        done()
+                    }
+                }
+            }
+
+            it("should fail login with bad recovery code") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.login(withRecoveryCode: "bad_recovery", mfaToken: MFAToken).start { result in
+                        expect(result).to(haveAuthenticationError(code: "invalid_grant", description: "Invalid recovery_code."))
+                        done()
+                    }
+                }
+            }
+
+            it("should fail login with invalid mfa") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.login(withRecoveryCode: RecoveryCode, mfaToken: "bad_token").start { result in
+                        expect(result).to(haveAuthenticationError(code: "invalid_grant", description: "Malformed mfa_token"))
+                        done()
+                    }
+                }
+            }
+        }
+
+        // MARK:- MFA Challenge
+
+        describe("MFA challenge") {
+
+            beforeEach {
+                stub(condition: isMultifactorChallenge(Domain) && hasAtLeast([
+                    "mfa_token": MFAToken,
+                    "client_id": ClientId,
+                    "challenge_type": "oob otp",
+                    "oob_channel": OOBChannel,
+                    "authenticator_id": AuthenticatorId
+                    ])) { _ in return multifactorChallengeResponse(challengeType: "oob") }.name = "MFA Challenge"
+            }
+
+            it("should request without filters") {
+                waitUntil(timeout: Timeout) { done in
+                    auth.multifactorChallenge(mfaToken: MFAToken, types: ChallengeTypes, channel: OOBChannel, authenticatorId: AuthenticatorId).start { result in
+                        expect(result).to(beSuccessful())
+                        done()
+                    }
+                }
+            }
+
         }
 
         // MARK:- Refresh Tokens
@@ -217,7 +318,46 @@ class AuthenticationSpec: QuickSpec {
             }
 
         }
-        
+
+        // MARK:- Modify and Create Requests
+
+        describe("Requests create and update") {
+
+            let refreshToken = UUID().uuidString.replacingOccurrences(of: "-", with: "")
+
+            it("should contain payload") {
+                let request = auth.renew(withRefreshToken: refreshToken)
+
+                expect(request.payload["refresh_token"] as? String) == refreshToken
+                expect(request.payload["grant_type"] as? String) == "refresh_token"
+                expect(request.payload["client_id"] as? String) == ClientId
+            }
+
+            it("add and override parameters") {
+                let request = auth.renew(withRefreshToken: refreshToken)
+                    .parameters([
+                        "client_id": "new Client ID",
+                        "phone": Phone
+                    ])
+
+                expect(request.payload["refresh_token"] as? String) == refreshToken
+                expect(request.payload["grant_type"] as? String) == "refresh_token"
+                expect(request.payload["client_id"] as? String) == "new Client ID"
+                expect(request.payload["phone"] as? String) == Phone
+            }
+
+            it("copy contains same informations") {
+                let baseRequest = auth.renew(withRefreshToken: refreshToken)
+                let modifiedRequest = baseRequest.parameters([:])
+
+                expect(baseRequest.session) == modifiedRequest.session
+                expect(baseRequest.url) == modifiedRequest.url
+                expect(baseRequest.method) == modifiedRequest.method
+                expect(baseRequest.payload as? [String: String]) == modifiedRequest.payload as? [String: String]
+                expect(baseRequest.headers) == modifiedRequest.headers
+            }
+        }
+
         // MARK:- Token Exchange
 
         describe("native social token exchange") {

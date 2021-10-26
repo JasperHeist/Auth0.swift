@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#if canImport(AuthenticationServices)
+#if WEB_AUTH_PLATFORM && canImport(AuthenticationServices)
 import AuthenticationServices
 
 @available(iOS 12.0, macOS 10.15, *)
@@ -44,9 +44,9 @@ final class AuthenticationServicesSession: SessionTransaction {
             guard $1 == nil, let callbackURL = $0 else {
                 let authError = $1 ?? WebAuthError.unknownError
                 if case ASWebAuthenticationSessionError.canceledLogin = authError {
-                    self?.callback(.failure(error: WebAuthError.userCancelled))
+                    self?.callback(.failure(WebAuthError.userCancelled))
                 } else {
-                    self?.callback(.failure(error: authError))
+                    self?.callback(.failure(authError))
                 }
                 return TransactionStore.shared.clear()
             }

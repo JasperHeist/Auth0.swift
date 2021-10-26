@@ -1,12 +1,10 @@
-version = '1.28.1'
-
 web_auth_files = [
-  'Auth0/A0ChallengeGenerator.h',
-  'Auth0/A0ChallengeGenerator.m',
-  'Auth0/A0RSA.h',
-  'Auth0/A0RSA.m',
-  'Auth0/A0SHA.h',
-  'Auth0/A0SHA.m',
+  'Auth0/ObjectiveC/A0ChallengeGenerator.h',
+  'Auth0/ObjectiveC/A0ChallengeGenerator.m',
+  'Auth0/ObjectiveC/A0RSA.h',
+  'Auth0/ObjectiveC/A0RSA.m',
+  'Auth0/ObjectiveC/A0SHA.h',
+  'Auth0/ObjectiveC/A0SHA.m',
   'Auth0/A0SimpleKeychain+RSAPublicKey.swift',
   'Auth0/Array+Encode.swift',
   'Auth0/AuthCancelable.swift',
@@ -58,7 +56,7 @@ excluded_files = [
 
 Pod::Spec.new do |s|
   s.name             = 'Auth0'
-  s.version          = version
+  s.version          = '1.37.1'
   s.summary          = "Swift toolkit for Auth0 API"
   s.description      = <<-DESC
                         Auth0 API toolkit written in Swift for iOS, watchOS, tvOS & macOS apps
@@ -75,33 +73,35 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '9.0'
   s.requires_arc = true
 
-  s.ios.source_files = 'Auth0/*.{swift,h,m}'
+  s.ios.source_files = 'Auth0/*.{swift,h,m}', 'Auth0/ObjectiveC/*.{h,m}'
   s.ios.frameworks = 'UIKit', 'SafariServices', 'LocalAuthentication'
   s.ios.weak_framework = 'AuthenticationServices'
   s.ios.dependency 'SimpleKeychain'
-  s.ios.dependency 'JWTDecode'
+  s.ios.dependency 'JWTDecode', '~> 2.0'
   s.ios.exclude_files = macos_files
   s.ios.pod_target_xcconfig = {
-    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => 'WEB_AUTH_PLATFORM'
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => 'WEB_AUTH_PLATFORM',
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) WEB_AUTH_PLATFORM=1'
   }
 
-  s.osx.source_files = 'Auth0/*.{swift,h,m}'
+  s.osx.source_files = 'Auth0/*.{swift,h,m}', 'Auth0/ObjectiveC/*.{h,m}'
   s.osx.exclude_files = ios_files
   s.osx.dependency 'SimpleKeychain'
-  s.osx.dependency 'JWTDecode'
+  s.osx.dependency 'JWTDecode', '~> 2.0'
   s.osx.pod_target_xcconfig = {
-    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => 'WEB_AUTH_PLATFORM'
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => 'WEB_AUTH_PLATFORM',
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) WEB_AUTH_PLATFORM=1'
   }
 
   s.watchos.source_files = 'Auth0/*.swift'
   s.watchos.exclude_files = excluded_files
   s.watchos.dependency 'SimpleKeychain'
-  s.watchos.dependency 'JWTDecode'
+  s.watchos.dependency 'JWTDecode', '~> 2.0'
 
   s.tvos.source_files = 'Auth0/*.swift'
   s.tvos.exclude_files = excluded_files
   s.tvos.dependency 'SimpleKeychain'
-  s.tvos.dependency 'JWTDecode'
+  s.tvos.dependency 'JWTDecode', '~> 2.0'
 
-  s.swift_versions = ['4.0', '4.1', '4.2', '5.0', '5.1', '5.2']
+  s.swift_versions = ['4.0', '4.1', '4.2', '5.0', '5.1', '5.2', '5.3', '5.4', '5.5']
 end

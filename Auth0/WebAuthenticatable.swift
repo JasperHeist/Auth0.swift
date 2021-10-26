@@ -20,6 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if WEB_AUTH_PLATFORM
+import Foundation
+
 /**
  Auth0 component for authenticating with web-based flow
 
@@ -59,7 +62,7 @@ public func webAuth(bundle: Bundle = Bundle.main) -> WebAuth {
  Auth0.webAuth(clientId: clientId, domain: "samples.auth0.com")
  ```
 
- - parameter clientId: id of your Auth0 client
+ - parameter clientId: Id of your Auth0 client
  - parameter domain:   name of your Auth0 domain
 
  - returns: Auth0 WebAuth component
@@ -80,7 +83,9 @@ public protocol WebAuthenticatable: Trackable, Loggable {
      Before enabling this flag you'll need to configure Universal Links
 
      - returns: the same WebAuth instance to allow method chaining
+     - warning: deprecated as Universal Links cannot be used as OAuth callbacks anymore. See https://openradar.appspot.com/51091611
      */
+    @available(*, deprecated, message: "cannot be used anymore, see https://openradar.appspot.com/51091611")
     func useUniversalLink() -> Self
 
     /**
@@ -133,7 +138,7 @@ public protocol WebAuthenticatable: Trackable, Loggable {
      */
     func parameters(_ parameters: [String: String]) -> Self
 
-    /// Setup the response types to be used for authentcation
+    /// Specify the response types to be used for authentcation
     ///
     /// - Parameter response: Array of ResponseOptions
     /// - Returns: the same WebAuth instance to allow method chaining
@@ -189,6 +194,18 @@ public protocol WebAuthenticatable: Trackable, Loggable {
      */
     func useEphemeralSession() -> Self
     #endif
+
+    /// Specify an invitation URL to join an organization.
+    ///
+    /// - Parameter invitationURL: organization invitation URL
+    /// - Returns: the same WebAuth instance to allow method chaining
+    func invitationURL(_ invitationURL: URL) -> Self
+
+    /// Specify an organization Id to log in to.
+    ///
+    /// - Parameter organization: organization Id
+    /// - Returns: the same WebAuth instance to allow method chaining
+    func organization(_ organization: String) -> Self
 
     /**
      Change the default grant used for auth from `code` (w/PKCE) to `token` (implicit grant)
@@ -250,3 +267,4 @@ public protocol WebAuthenticatable: Trackable, Loggable {
      */
     func clearSession(federated: Bool, callback: @escaping (Bool) -> Void)
 }
+#endif

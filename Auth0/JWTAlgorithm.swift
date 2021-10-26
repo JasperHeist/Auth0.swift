@@ -20,12 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if WEB_AUTH_PLATFORM
 import Foundation
 import JWTDecode
+#if SWIFT_PACKAGE
+import Auth0ObjectiveC
+#endif
 
 enum JWTAlgorithm: String {
     case rs256 = "RS256"
     case hs256 = "HS256"
+
+    var shouldVerify: Bool {
+        switch self {
+        case .rs256: return true
+        case .hs256: return false
+        }
+    }
 
     func verify(_ jwt: JWT, using jwk: JWK) -> Bool {
         let separator = "."
@@ -42,3 +53,4 @@ enum JWTAlgorithm: String {
         }
     }
 }
+#endif

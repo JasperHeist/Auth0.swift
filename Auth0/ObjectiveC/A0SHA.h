@@ -1,4 +1,4 @@
-// A0SHA.m
+// A0SHA.h
 //
 // Copyright (c) 2016 Auth0 (http://auth0.com)
 //
@@ -20,42 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <A0SHA.h>
-#import <CommonCrypto/CommonHMAC.h>
+#if WEB_AUTH_PLATFORM
+#import <Foundation/Foundation.h>
 
-static NSString * const kDefaultSHAAlgorithm = @"sha256";
+NS_ASSUME_NONNULL_BEGIN
+@interface A0SHA: NSObject
 
-@interface A0SHA ()
-@property (readonly, nonatomic) NSInteger digestLength;
-@end
+- (nullable instancetype)initWithAlgorithm: (NSString *)algorithm;
 
-@implementation A0SHA
-
-- (instancetype)initWithAlgorithm:(NSString *)algorithm {
-    self = [super init];
-    if (self) {
-        const NSString * alg = algorithm.lowercaseString;
-        if ([kDefaultSHAAlgorithm  isEqual: alg]) {
-            _digestLength = CC_SHA256_DIGEST_LENGTH;
-        } else {
-            return nil;
-        }
-    }
-    return self;
-}
-
-- (instancetype)init {
-    return [self initWithAlgorithm: kDefaultSHAAlgorithm];
-}
-
-- (NSData *)hash:(NSData *)data {
-    uint8_t hashBytes[self.digestLength];
-    memset(hashBytes, 0x0, self.digestLength);
-
-    CC_SHA256(data.bytes, (CC_LONG)data.length, hashBytes);
-
-    NSData *hash = [NSData dataWithBytes:hashBytes length:self.digestLength];
-    return hash;
-}
+- (NSData *)hash: (NSData *)data;
 
 @end
+NS_ASSUME_NONNULL_END
+#endif

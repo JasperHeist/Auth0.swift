@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if WEB_AUTH_PLATFORM
 #if canImport(AuthenticationServices)
 import AuthenticationServices
 #endif
@@ -38,6 +39,8 @@ class BaseWebAuth: WebAuthenticatable {
     private(set) var parameters: [String: String] = [:]
     private(set) var issuer: String
     private(set) var leeway: Int = 60 * 1000 // Default leeway is 60 seconds
+    private(set) var organization: String?
+    private(set) var invitationURL: URL?
     private var responseType: [ResponseType] = [.code]
     private var nonce: String?
     private var maxAge: Int?
@@ -137,18 +140,42 @@ class BaseWebAuth: WebAuthenticatable {
     }
     #endif
 
+    func invitationURL(_ invitationURL: URL) -> Self {
+        self.invitationURL = invitationURL
+        return self
+    }
+
+    func organization(_ organization: String) -> Self {
+        self.organization = organization
+        return self
+    }
+
     func start(_ callback: @escaping (Result<Credentials>) -> Void) {
         guard let redirectURL = self.redirectURL else {
-            return callback(Result.failure(error: WebAuthError.noBundleIdentifierFound))
+            return callback(Result.failure(WebAuthError.noBundleIdentifierFound))
         }
         if self.responseType.contains(.idToken) {
-            guard self.nonce != nil else { return callback(Result.failure(error: WebAuthError.noNonceProvided)) }
+            guard self.nonce != nil else { return callback(Result.failure(WebAuthError.noNonceProvided)) }
         }
         let handler = self.handler(redirectURL)
         let state = self.parameters["state"] ?? generateDefaultState()
+        var organization: String? = self.organization
+        var invitation: String?
+        if let invitationURL = self.invitationURL {
+            guard let queryItems = URLComponents(url: invitationURL, resolvingAgainstBaseURL: false)?.queryItems,
+                let organizationId = queryItems.first(where: { $0.name == "organization" })?.value,
+                let invitationId = queryItems.first(where: { $0.name == "invitation" })?.value else {
+                return callback(.failure(WebAuthError.unknownError)) // TODO: On the next major, create a new error case
+            }
+            organization = organizationId
+            invitation = invitationId
+        }
+
         let authorizeURL = self.buildAuthorizeURL(withRedirectURL: redirectURL,
                                                   defaults: handler.defaults,
-                                                  state: state)
+                                                  state: state,
+                                                  organization: organization,
+                                                  invitation: invitation)
 
         // performLogin must handle the callback
         if let session = performLogin(authorizeURL: authorizeURL,
@@ -177,7 +204,8 @@ class BaseWebAuth: WebAuthenticatable {
                                                  callback: callback)
         }
         #endif
-        callback(.failure(error: WebAuthError.unknownError))
+        // TODO: On the next major add a new case to WebAuthError
+        callback(.failure(WebAuthError.unknownError))
         return nil
     }
 
@@ -220,7 +248,11 @@ class BaseWebAuth: WebAuthenticatable {
         return nil
     }
 
-    func buildAuthorizeURL(withRedirectURL redirectURL: URL, defaults: [String: String], state: String?) -> URL {
+    func buildAuthorizeURL(withRedirectURL redirectURL: URL,
+                           defaults: [String: String],
+                           state: String?,
+                           organization: String?,
+                           invitation: String?) -> URL {
         let authorize = URL(string: "/authorize", relativeTo: self.url)!
         var components = URLComponents(url: authorize, resolvingAgainstBaseURL: true)!
         var items: [URLQueryItem] = []
@@ -230,11 +262,18 @@ class BaseWebAuth: WebAuthenticatable {
         entries["scope"] = "openid"
         entries["state"] = state
         entries["response_type"] = self.responseType.map { $0.label! }.joined(separator: " ")
+
+        if let maxAge = self.maxAge {
+            entries["max_age"] = String(maxAge)
+        }
         if self.responseType.contains(.idToken) {
             entries["nonce"] = self.nonce
-            if let maxAge = self.maxAge {
-                entries["max_age"] = String(maxAge)
-            }
+        }
+        if let organization = organization {
+            entries["organization"] = organization
+        }
+        if let invitation = invitation {
+            entries["invitation"] = invitation
         }
 
         self.parameters.forEach { entries[$0] = $1 }
@@ -255,14 +294,16 @@ class BaseWebAuth: WebAuthenticatable {
                         issuer: self.issuer,
                         leeway: self.leeway,
                         maxAge: self.maxAge,
-                        nonce: self.nonce)
+                        nonce: self.nonce,
+                        organization: self.organization)
         }
         return ImplicitGrant(authentication: authentication,
                              responseType: self.responseType,
                              issuer: self.issuer,
                              leeway: self.leeway,
                              maxAge: self.maxAge,
-                             nonce: self.nonce)
+                             nonce: self.nonce,
+                             organization: self.organization)
     }
 
     func generateDefaultState() -> String? {
@@ -289,3 +330,4 @@ extension Auth0Authentication {
     }
 
 }
+#endif
